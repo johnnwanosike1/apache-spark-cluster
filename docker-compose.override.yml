@@ -1,0 +1,51 @@
+# =============================================================================
+# docker-compose.override.yml — local customisation
+#
+# Docker Compose automatically merges this file with docker-compose.yml.
+# Use it to tweak resources or add mounts for your local setup without
+# modifying the main compose file (which is tracked in git).
+#
+# Examples below are commented out — uncomment what you need.
+# =============================================================================
+
+services:
+
+  spark-worker-1:
+    environment:
+      # Increase cores/memory if your machine has more headroom
+      SPARK_WORKER_CORES: "${SPARK_WORKER_CORES:-2}"
+      SPARK_WORKER_MEMORY: "${SPARK_WORKER_MEMORY:-2g}"
+
+  spark-worker-2:
+    environment:
+      SPARK_WORKER_CORES: "${SPARK_WORKER_CORES:-2}"
+      SPARK_WORKER_MEMORY: "${SPARK_WORKER_MEMORY:-2g}"
+
+  notebook:
+    environment:
+      JUPYTER_TOKEN: "${JUPYTER_TOKEN:-spark}"
+
+  # Uncomment to add a third worker:
+  # spark-worker-3:
+  #   <<: *spark-common        # NOTE: anchors don't work in override files;
+  #   image: spark-cluster     #       use the built image name directly
+  #   container_name: spark-worker-3
+  #   hostname: spark-worker-3
+  #   depends_on:
+  #     spark-master:
+  #       condition: service_healthy
+  #   environment:
+  #     GLUTEN_ENABLED: "${GLUTEN_ENABLED:-false}"
+  #     SPARK_ROLE: worker
+  #     SPARK_WORKER_CORES: "2"
+  #     SPARK_WORKER_MEMORY: "2g"
+  #     SPARK_WORKER_WEBUI_PORT: "8083"
+  #   ports:
+  #     - "8083:8083"
+  #   volumes:
+  #     - ./data:/workspace/data
+  #     - ./notebooks:/workspace/notebooks
+  #     - spark-logs:/opt/spark/logs
+  #   networks:
+  #     - spark-net
+  #   restart: unless-stopped

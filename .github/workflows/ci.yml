@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Validate configs & scripts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Lint Dockerfile (hadolint)
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          ignore: DL3008,DL3009,DL3013,SC2086
+
+      - name: Validate docker-compose syntax
+        run: docker compose config --quiet
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Check Python syntax
+        run: |
+          python -m py_compile scripts/generate_data.py
+          python -m py_compile scripts/test_connection.py
+          echo "Python scripts: syntax OK"
+
+      - name: Validate notebook JSON
+        run: |
+          python - <<'EOF'
+          import json, sys, pathlib
+          for nb in pathlib.Path("notebooks").glob("*.ipynb"):
+              try:
+                  json.loads(nb.read_text())
+                  print(f"  OK  {nb}")
+              except Exception as e:
+                  print(f"  FAIL {nb}: {e}")
+                  sys.exit(1)
+          EOF
+
+      - name: Check entrypoint is executable
+        run: |
+          test -x entrypoint.sh && echo "entrypoint.sh is executable" \
+            || (echo "entrypoint.sh is not executable" && exit 1)

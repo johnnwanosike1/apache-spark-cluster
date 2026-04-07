@@ -1,0 +1,128 @@
+# =============================================================================
+# Apache Spark 4.1.1 — local cluster
+#
+# Vanilla mode (default):  docker compose up
+# Gluten/Velox mode:       GLUTEN_ENABLED=true docker compose up
+#                      or: edit .env → GLUTEN_ENABLED=true
+#
+# Services:
+#   spark-master    — Spark master               :8080 (UI)  :7077 (cluster)
+#   spark-worker-1  — Worker 1                   :8081 (UI)
+#   spark-worker-2  — Worker 2                   :8082 (UI)
+#   spark-history   — History Server             :18080
+#   notebook        — JupyterLab                 :8888
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Shared fragment — applied to every Spark node
+# ---------------------------------------------------------------------------
+x-spark-common: &spark-common
+  build:
+    context: .
+    dockerfile: Dockerfile
+  env_file:
+    - path: .env
+      required: false          # .env is optional; falls back to defaults
+  volumes:
+    - ./data:/workspace/data
+    - ./notebooks:/workspace/notebooks
+    - spark-logs:/opt/spark/logs
+  networks:
+    - spark-net
+  restart: unless-stopped
+
+# ---------------------------------------------------------------------------
+# Environment presets — switch by changing <<: *vanilla-env → *gluten-env
+# or by passing GLUTEN_ENABLED=true on the CLI / in .env
+# ---------------------------------------------------------------------------
+x-vanilla-env: &vanilla-env
+  GLUTEN_ENABLED: "${GLUTEN_ENABLED:-false}"
+
+x-gluten-env: &gluten-env
+  GLUTEN_ENABLED: "true"
+
+services:
+
+  # ── Master ─────────────────────────────────────────────────────────────────
+  spark-master:
+    <<: *spark-common
+    container_name: spark-master
+    hostname: spark-master
+    environment:
+      <<: *vanilla-env        # change to *gluten-env to hard-code Gluten on master
+      SPARK_ROLE: master
+    ports:
+      - "8080:8080"           # Master Web UI
+      - "7077:7077"           # Cluster port
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8080"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  # ── Worker 1 ───────────────────────────────────────────────────────────────
+  spark-worker-1:
+    <<: *spark-common
+    container_name: spark-worker-1
+    hostname: spark-worker-1
+    depends_on:
+      spark-master:
+        condition: service_healthy
+    environment:
+      <<: *vanilla-env
+      SPARK_ROLE: worker
+      SPARK_WORKER_CORES: "2"
+      SPARK_WORKER_MEMORY: "2g"
+      SPARK_WORKER_WEBUI_PORT: "8081"
+    ports:
+      - "8081:8081"
+
+  # ── Worker 2 ───────────────────────────────────────────────────────────────
+  spark-worker-2:
+    <<: *spark-common
+    container_name: spark-worker-2
+    hostname: spark-worker-2
+    depends_on:
+      spark-master:
+        condition: service_healthy
+    environment:
+      <<: *vanilla-env
+      SPARK_ROLE: worker
+      SPARK_WORKER_CORES: "2"
+      SPARK_WORKER_MEMORY: "2g"
+      SPARK_WORKER_WEBUI_PORT: "8082"
+    ports:
+      - "8082:8082"
+
+  # ── History Server ─────────────────────────────────────────────────────────
+  spark-history:
+    <<: *spark-common
+    container_name: spark-history
+    hostname: spark-history
+    environment:
+      SPARK_ROLE: history
+    ports:
+      - "18080:18080"
+
+  # ── JupyterLab Notebook ────────────────────────────────────────────────────
+  notebook:
+    <<: *spark-common
+    container_name: spark-notebook
+    hostname: spark-notebook
+    depends_on:
+      spark-master:
+        condition: service_healthy
+    environment:
+      <<: *vanilla-env
+      SPARK_ROLE: notebook
+      JUPYTER_TOKEN: spark
+    ports:
+      - "8888:8888"           # JupyterLab
+      - "4040:4040"           # Spark App UI (active job)
+
+volumes:
+  spark-logs:
+
+networks:
+  spark-net:
+    driver: bridge

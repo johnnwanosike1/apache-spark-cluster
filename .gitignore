@@ -1,0 +1,38 @@
+# Runtime data — generated at runtime, never commit
+data/*.parquet
+data/parquet/
+data/delta/
+data/iceberg/
+data/warehouse/
+spark-events/
+
+# Keep placeholder files
+!data/.gitkeep
+!spark-events/.gitkeep
+
+# Local environment — contains secrets, never commit
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.env
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+
+# Benchmark results (optional — remove to commit results)
+notebooks/results/
+
+# macOS
+.DS_Store
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+.vs
