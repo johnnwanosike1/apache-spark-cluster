@@ -12,6 +12,7 @@ set -e
 ROLE=${SPARK_ROLE:-worker}
 GLUTEN_JAR=${SPARK_HOME}/jars/gluten.jar
 
+
 # ---------------------------------------------------------------------------
 # Gluten configuration — injected only when JAR is present
 # ---------------------------------------------------------------------------
