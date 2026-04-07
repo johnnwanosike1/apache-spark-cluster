@@ -1,37 +1,45 @@
 # Changelog
 
-All notable changes to this project are documented here.
-Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+## [2.0.0] — 2026-04-07
+
+### Changed
+- **Spark downgrade: 4.1.1 → 3.5.8** — Gluten 1.4.x is fully compatible with
+  Spark 3.5 / Scala 2.12. Spark 4.x support requires Gluten 1.5 (not yet released).
+- Base image: `spark:3.5.8-scala2.12-java17-python3-ubuntu`
+- Iceberg: `iceberg-spark-runtime-3.5_2.12:1.5.2` (was `4.0_2.13:1.10.1`)
+- Delta Lake: `delta-spark_2.12:3.3.1` (was `delta-spark_4.1_2.13:4.1.0`)
+- Python client: `pyspark==3.5.8`, `delta-spark==3.3.1`
+
+### Fixed
+- `entrypoint.sh`: restored full Gluten config including
+  `spark.shuffle.manager=ColumnarShuffleManager` which is valid on Spark 3.5.
+
+---
+
+## [1.0.2] — 2026-04-07
+
+### Fixed
+- `entrypoint.sh`: `unset SPARK_SUBMIT_OPTS` and `unset SPARK_JAVA_OPTS` added
+  to prevent `--conf` flags from leaking into `spark-class` / `launch_gateway`
+  JVM invocations (`Unrecognized option: --conf` crash).
+- `entrypoint.sh`: removed `spark.shuffle.manager=ColumnarShuffleManager` from
+  Gluten config block — this class does not exist in Spark 4.x and caused a
+  `ClassNotFoundException` JVM crash.
 
 ---
 
 ## [1.0.0] — 2026-04-07
 
 ### Added
-- Apache Spark **4.1.1** cluster (Scala 2.13, Java 21) on official `spark:4.1.1` Docker image
-- Custom `Dockerfile` — pre-downloads Iceberg 1.10.1, Delta Lake 4.1.0, and Gluten 1.4.0 JARs at build time; no `spark.jars.packages` at runtime
-- `entrypoint.sh` — single script handles `master`, `worker`, `notebook`, and `history` roles; Gluten/Velox enabled or disabled at startup via `GLUTEN_ENABLED` env var
-- `docker-compose.yml` — master + 2 workers + History Server + JupyterLab; vanilla/Gluten toggle via env var
-- `docker-compose.override.yml` — local resource overrides without touching the main compose file
-- `.env.example` — documents all supported environment variables
-- `conf/spark-defaults.conf` — baseline config: AQE, event logging, Iceberg & Delta catalogs, Arrow
-- `Makefile` — `make up`, `make up-gluten`, `make build`, `make data`, `make clean`, `make notebook`
-- `scripts/generate_data.py` — TPC-H style Parquet data generator (orders, lineitem, customer); configurable scale factor
-- `scripts/test_connection.py` — smoke test for Spark master connectivity
-- `notebooks/spark_scenarios_benchmark.ipynb`:
-  - **Part A** — 13 core Spark scenarios: DataFrame API, SQL window functions, caching, partitioning, broadcast join, Parquet, Iceberg, Delta Lake, Structured Streaming, UDFs, AQE
-  - **Part B** — TPC-H benchmark (Q1, Q3, Q6, Q12, Q_window) with vanilla vs Gluten/Velox comparison chart
-- `.github/workflows/ci.yml` — GitHub Actions: Dockerfile lint (hadolint), docker-compose validation, Python syntax check, notebook JSON validation
+- Initial release with Spark 4.1.1 cluster (Scala 2.13, Java 21)
+- Dockerfile, entrypoint.sh, docker-compose.yml
+- Iceberg 1.10.1 + Delta 4.1.0 + Gluten 1.6.0
+- JupyterLab notebook with 13 scenarios + TPC-H benchmark
+- Makefile, .env.example, CONTRIBUTING.md, GitHub Actions CI
 
-### Notes
-- Gluten 1.4.x targets Spark 3.5; Spark 4.x support is planned for Gluten 1.5 (not released as of April 2026). On Spark 4.1.1 some operators fall back to JVM — safe and expected. See `Dockerfile` for the upgrade path.
+## [3.0.0] — 2026-04-07
 
----
-
-## Roadmap
-
-- [ ] Update to Gluten 1.5 once Spark 4.x support is released
-- [ ] Add Spark Connect mode (separate compose profile)
-- [ ] Add MinIO service for S3-compatible local object storage
-- [ ] Add Nessie catalog option for Iceberg
-- [ ] GitHub Actions job to build and push Docker image to GHCR
+### Changed
+- **Gluten upgrade: 1.4.0 → 1.6.0**
+- Download URL: `https://dlcdn.apache.org/gluten/1.6.0/apache-gluten-1.6.0-bin-spark-3.5.tar.gz`
+- New official URL format from `gluten.apache.org/downloads/`

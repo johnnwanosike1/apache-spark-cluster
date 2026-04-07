@@ -67,3 +67,8 @@ notebook:
 	@which xdg-open > /dev/null 2>&1 && xdg-open $(JUPYTER_URL) || \
 	 which open      > /dev/null 2>&1 && open      $(JUPYTER_URL) || \
 	 echo "Open $(JUPYTER_URL) in your browser  (token: spark)"
+
+nuke:
+	docker compose down --rmi all --volumes --remove-orphans 2>/dev/null || true
+	docker builder prune -f
+	@echo "All images and cache removed. Run 'make build' to rebuild from scratch."

@@ -1,0 +1,16 @@
+# Force LF line endings for all shell scripts regardless of OS.
+# Windows CRLF (\r\n) in entrypoint.sh causes:
+#   exec /entrypoint.sh: no such file or directory
+# even when the file exists — because #!/bin/bash\r is not a valid shebang.
+
+* text=auto
+
+*.sh    text eol=lf
+*.conf  text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.py    text eol=lf
+*.md    text eol=lf
+*.json  text eol=lf
+Makefile text eol=lf
+Dockerfile text eol=lf

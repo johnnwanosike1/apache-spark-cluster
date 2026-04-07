@@ -1,20 +1,17 @@
 #!/usr/bin/env python3
 """
-Quick smoke test — verifies the Spark master is reachable.
+Quick smoke test — verifies the Spark 3.5.8 master is reachable.
 
 Usage:
     python3 scripts/test_connection.py
 """
+import sys, time
 
-import sys
-import time
-
-
-def main() -> None:
+def main():
     try:
         from pyspark.sql import SparkSession
     except ImportError:
-        print("ERROR: pyspark not installed. Run: pip install pyspark==4.1.1")
+        print("ERROR: pyspark not installed. Run: pip install pyspark==3.5.8")
         sys.exit(1)
 
     master = "spark://spark-master:7077"
@@ -45,7 +42,6 @@ def main() -> None:
 
     print("\nAll checks passed.")
     spark.stop()
-
 
 if __name__ == "__main__":
     main()

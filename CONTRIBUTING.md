@@ -49,7 +49,7 @@ Edit `Dockerfile`:
 
 ```dockerfile
 ARG SPARK_VERSION=4.1.1    # update here
-ARG GLUTEN_VERSION=1.4.0   # update here when Gluten 1.5 (Spark 4.x) is released
+ARG GLUTEN_VERSION=1.6.0   # update here when Gluten 1.5 (Spark 4.x) is released
 ```
 
 Also update the Python client version in `scripts/test_connection.py`:

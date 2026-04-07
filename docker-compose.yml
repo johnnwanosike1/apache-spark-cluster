@@ -1,5 +1,6 @@
+
 # =============================================================================
-# Apache Spark 4.1.1 — local cluster
+# Apache Spark 3.5.8 — local cluster
 #
 # Vanilla mode (default):  docker compose up
 # Gluten/Velox mode:       GLUTEN_ENABLED=true docker compose up
