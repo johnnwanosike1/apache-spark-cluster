@@ -49,7 +49,7 @@ jobs:
           failed = 0
           for nb in sorted(pathlib.Path("notebooks").glob("*.ipynb")):
               try:
-                  json.loads(nb.read_text())
+                  json.loads(nb.read_text(encoding="utf-8", errors="replace"))
                   print(f"  OK   {nb}")
               except Exception as e:
                   print(f"  FAIL {nb}: {e}")
@@ -101,7 +101,7 @@ jobs:
           check_files = ["README.md", "CHANGELOG.md", "entrypoint.sh", "conf/spark-defaults.conf", ".env.example"]
           failed = 0
           for fname in check_files:
-              text = pathlib.Path(fname).read_text()
+              text = pathlib.Path(fname).read_text(encoding="utf-8", errors="replace")
               for ref in stale:
                   # Allow refs in CHANGELOG historical entries
                   if ref in text and fname != "CHANGELOG.md":
