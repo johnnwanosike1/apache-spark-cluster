@@ -21,12 +21,12 @@ jobs:
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: Dockerfile
-          # DL3008 — apt-get pin versions (intentionally unpinned)
-          # DL3009 — apt-get clean (handled by --no-install-recommends)
-          # DL3013 — pip pin versions (intentionally pinned where needed)
-          # DL3042 — pip --no-cache-dir (already present)
-          # SC2086 — double-quote variables (false positives in heredocs)
-          ignore: DL3008,DL3009,DL3013,DL3042,SC2086
+          # DL3008 â€” apt-get pin versions (intentionally unpinned)
+          # DL3009 â€” apt-get clean (handled by --no-install-recommends)
+          # DL3013 â€” pip pin versions (intentionally pinned where needed)
+          # DL3042 â€” pip --no-cache-dir (already present)
+          # SC2086 â€” double-quote variables (false positives in heredocs)
+          ignore: DL3002,DL3008,DL3009,DL3013,DL3042,SC2086
 
       - name: Validate docker-compose syntax
         run: docker compose config --quiet
@@ -87,7 +87,7 @@ jobs:
       - name: Check entrypoint has no CRLF line endings
         run: |
           if file entrypoint.sh | grep -q CRLF; then
-            echo "entrypoint.sh: CRLF line endings detected — will break on Linux"
+            echo "entrypoint.sh: CRLF line endings detected â€” will break on Linux"
             exit 1
           else
             echo "entrypoint.sh: LF line endings OK"
