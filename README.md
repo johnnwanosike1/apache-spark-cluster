@@ -1,4 +1,4 @@
-# Apache Spark 4.0.2 — Local Cluster with Gluten/Velox, Iceberg, Delta, JupyterLab as a part local development environment for testing and benchmarking Spark features and performance.
+# Apache Spark 4.0.2 — Local Cluster with Gluten/Velox, Iceberg, Delta, JupyterLab 
 
 A self-contained local Spark cluster with Gluten/Velox support, built on the official `spark:4.0.2-scala2.13-java17-python3-ubuntu` Docker image.
 
