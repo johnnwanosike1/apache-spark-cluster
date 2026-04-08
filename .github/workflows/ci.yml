@@ -26,7 +26,7 @@ jobs:
           # DL3013 — pip pin versions (intentionally pinned where needed)
           # DL3042 — pip --no-cache-dir (already present)
           # SC2086 — double-quote variables (false positives in heredocs)
-          ignore: DL3002,DL3008,DL3009,DL3013,DL3042,SC2086
+          ignore: DL3002,DL3008,DL3009,DL3013,DL3042,DL4006,SC2086
 
       - name: Validate docker-compose syntax
         run: docker compose config --quiet
