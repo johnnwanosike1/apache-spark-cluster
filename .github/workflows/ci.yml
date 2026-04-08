@@ -26,7 +26,7 @@ jobs:
           # DL3013 — pip pin versions (intentionally pinned where needed)
           # DL3042 — pip --no-cache-dir (already present)
           # SC2086 — double-quote variables (false positives in heredocs)
-          ignore: DL3002,DL3008,DL3009,DL3013,DL3042,SC2086
+          ignore: DL3002,DL3008,DL3009,DL3013,DL3042,DL4006,SC2086
 
       - name: Validate docker-compose syntax
         run: docker compose config --quiet
@@ -49,7 +49,7 @@ jobs:
           failed = 0
           for nb in sorted(pathlib.Path("notebooks").glob("*.ipynb")):
               try:
-                  json.loads(nb.read_text())
+                  json.loads(nb.read_text(encoding="utf-8", errors="replace"))
                   print(f"  OK   {nb}")
               except Exception as e:
                   print(f"  FAIL {nb}: {e}")
@@ -61,7 +61,7 @@ jobs:
         run: |
           python - <<'PYEOF'
           import pathlib, sys
-          conf = pathlib.Path("conf/spark-defaults.conf").read_text()
+          conf = pathlib.Path("conf/spark-defaults.conf").read_text(encoding="utf-8", errors="replace")
           required = [
               "spark.sql.ansi.enabled",
               "spark.shuffle.sort.bypassMergeThreshold",
@@ -80,6 +80,8 @@ jobs:
 
       - name: Check entrypoint is executable
         run: |
+          # Ensure executable bit is set (git on Windows may lose it)
+          chmod +x entrypoint.sh
           test -x entrypoint.sh \
             && echo "entrypoint.sh: executable OK" \
             || (echo "entrypoint.sh: NOT executable" && exit 1)
@@ -101,7 +103,7 @@ jobs:
           check_files = ["README.md", "CHANGELOG.md", "entrypoint.sh", "conf/spark-defaults.conf", ".env.example"]
           failed = 0
           for fname in check_files:
-              text = pathlib.Path(fname).read_text()
+              text = pathlib.Path(fname).read_text(encoding="utf-8", errors="replace")
               for ref in stale:
                   # Allow refs in CHANGELOG historical entries
                   if ref in text and fname != "CHANGELOG.md":

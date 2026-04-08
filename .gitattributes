@@ -14,3 +14,4 @@
 *.json  text eol=lf
 Makefile text eol=lf
 Dockerfile text eol=lf
+entrypoint.sh text eol=lf
