@@ -17,6 +17,12 @@ New folder structure under `notebooks/` with deep-dive notebooks for self-study:
 - `01_fallback_analysis.ipynb` — Gluten/Velox operator fallback analysis: which operators
   offload to Velox vs fall back to JVM, how to measure offload rate, Python UDF fallback,
   decision tree for writing Gluten-friendly queries
+- `02_velox_performance_deep_dive.ipynb` — Why Velox outperforms JVM (SIMD vectorization,
+  columnar processing, native Parquet reader), 18-query benchmark framework across all
+  operator categories, vanilla vs Gluten speedup report with median/p25/p75 timings
+- `03_off_heap_memory.ipynb` — Complete memory model (on-heap/off-heap/overhead/Velox
+  native pool), GC pressure profiling in both modes, Tungsten off-heap configuration,
+  Velox memory tuning, OOM error diagnosis guide with fixes
 
 #### `performance_internals/`
 - `01_query_plan_deep_dive.ipynb` — Reading `explain()` output, all plan modes, physical

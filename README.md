@@ -98,7 +98,9 @@ spark-cluster/
 │   │
 │   ├── gluten_velox/                        ← Gluten/Velox deep dives
 │   │   ├── README.md
-│   │   └── 01_fallback_analysis.ipynb
+│   │   ├── 01_fallback_analysis.ipynb
+│   │   ├── 02_velox_performance_deep_dive.ipynb
+│   │   └── 03_off_heap_memory.ipynb
 │   │
 │   ├── performance_internals/               ← Query planning & optimization
 │   │   ├── README.md
@@ -119,6 +121,8 @@ spark-cluster/
 │       ├── 02_streaming_iceberg.ipynb
 │       └── 03_stateful_operations.ipynb
 │
+├── docs/                                    ← Troubleshooting guides
+│   └── windows-tips.md
 ├── data/                                    ← Parquet data (git-ignored)
 └── spark-events/                            ← History Server logs (git-ignored)
 ```
@@ -162,6 +166,14 @@ spark-cluster/
 | Notebook | What you will learn |
 |---|---|
 | `01_structured_streaming_fundamentals` | Stream-as-table model, file/memory sources, output modes, watermarking, sliding windows, checkpointing, metrics monitoring |
+
+## Docs & Troubleshooting
+
+Platform-specific tips and known issues are in the [`docs/`](docs/) folder.
+
+| Guide | Content |
+|---|---|
+| [`docs/windows-tips.md`](docs/windows-tips.md) | Port binding errors (Hyper-V reserved ranges), CRLF line endings, executable bits, Docker memory |
 
 ## Benchmark Workflow
 
