@@ -10,6 +10,6 @@ Each format has 10 notebooks with minimum 5 detailed steps and explanations.
 | Delta Lake | `delta/` | First table, ACID, DML, time travel, OPTIMIZE/ZORDER, schema management, CDF, partitioning, maintenance |
 | Iceberg | `iceberg/` | First table, snapshots, time travel, hidden partitioning, partition evolution, schema evolution, MERGE, maintenance, metadata tables |
 | Avro | `avro/` | Reading/writing, schema definition, evolution, nullable unions, nested records, Kafka simulation, Avro vs Parquet, landing zone pipeline, compression |
-| ORC | `orc/` | *(coming)* |
-| JSON | `json/` | *(coming)* |
-| Protobuf | `protobuf/` | *(coming)* |
+| ORC | `orc/` | Reading/writing, internals, predicate pushdown, Hive compat, stripe tuning, ORC vs Parquet, migration |
+| JSON | `json/` | Reading/writing, schema inference, nested data, streaming, performance, REST APIs, validation, pipeline |
+| Protobuf | `protobuf/` | Proto schema, serialization, Spark from_protobuf, schema evolution, Kafka, vs JSON/Avro, pipeline |

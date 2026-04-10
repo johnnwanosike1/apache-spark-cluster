@@ -2,12 +2,52 @@
 
 All notable changes follow [Semantic Versioning](https://semver.org/):
 - **MAJOR** — breaking stack change (Spark version, incompatible config)
-- **MINOR** — new features, new notebooks, new tools
-- **PATCH** — bug fixes, documentation, CI improvements
+- **MINOR** — new features,  new tools
+- **PATCH** — bug fixes, documentation, CI improvements, new notebooks
 
 ---
 
-## [1.1.2] — 2026-04-10
+## [1.1.3] — 2026-04-10
+
+### Added — ORC basics (10), JSON basics (10), Protobuf basics (10)
+
+#### `data_formats_storage/basics/orc/`
+- `01_reading_orc` — spark.read.orc, column pruning, predicate pushdown, stripe metadata, ORC vs Parquet size
+- `02_writing_orc` — compression codecs (zlib/snappy/lz4/zstd), stripe size, bloom filters, sorted write
+- `03_orc_internals` — 3-level index (file/stripe/row-index), column encodings (DIRECT/DICTIONARY/DELTA/RLE_V2), statistics
+- `04_predicate_pushdown` — bloom filter + min/max skipping, supported predicates, explain() verification
+- `05_orc_vs_parquet` — head-to-head benchmark, schema evolution limits, ecosystem, when to use each
+- `06_hive_compatibility` — Hive-style partition discovery, ACID ORC format (base + delta), SerDe properties
+- `07_complex_types` — StructType/ArrayType/MapType in ORC, nested column pruning, explode patterns
+- `08_stripe_tuning` — stripe size vs query pattern benchmark, row index stride, production config template
+- `09_orc_to_parquet` — migration pipeline, schema preservation, row count + checksum validation
+- `10_performance_tuning` — slow baseline diagnosis, apply all optimizations, before/after benchmark, checklist
+
+#### `data_formats_storage/basics/json/`
+- `01_reading_json` — spark.read.json, multiLine mode, PERMISSIVE/DROPMALFORMED/FAILFAST, all options
+- `02_writing_json` — compression codecs, date/timestamp formatting, single file coalesce, write modes
+- `03_schema_inference` — inferSchema cost, samplingRatio danger, type conflicts, primitivesAsString, explicit schema
+- `04_nested_json` — struct dot notation, explode/posexplode/explode_outer, from_json/to_json, get_json_object, flatten
+- `05_json_streaming` — file-based streaming, Kafka JSON deserialization, from_json in Structured Streaming
+- `06_json_performance` — JSON vs Parquet vs Avro size/speed benchmark, no column pruning, convert-first pattern
+- `07_json_schema_validation` — PERMISSIVE + columnNameOfCorruptRecord, business rule validation, quarantine pipeline
+- `08_json_rest_apis` — wrapped/paginated API responses, unwrapping with explode, multi-page normalization
+- `09_json_to_parquet` — multi-day landing zone, incremental processing with checkpoint, row count validation
+- `10_json_best_practices` — schema versioning, deduplication, production checklist, common pitfalls
+
+#### `data_formats_storage/basics/protobuf/`
+- `01_what_is_protobuf` — format overview, wire types, Protobuf vs JSON vs Avro, gRPC use case, Spark API
+- `02_proto_schema` — proto3 syntax, all scalar types, nested messages, repeated fields, oneof, enums, field numbers
+- `03_serialization` — wire format internals (varint/fixed/length-delimited), Python protobuf library, size benchmark
+- `04_spark_protobuf` — from_protobuf/to_protobuf, descriptor file compilation, file format, Spark 4.0.2
+- `05_schema_evolution` — field number permanence, reserved numbers, wire-compatible type changes, vs Avro evolution
+- `06_protobuf_kafka` — Kafka + Protobuf architecture, Confluent SR wire format (magic byte + schema_id), streaming
+- `07_protobuf_vs_json_avro` — comprehensive benchmark: size, speed, evolution, ecosystem, gRPC, decision guide
+- `08_nested_protobuf` — nested message→StructType, repeated→ArrayType, map→MapType, oneof, flatten for analytics
+- `09_protobuf_to_parquet` — binary landing zone, UDF-based deserializer, Parquet output, row count validation
+- `10_protobuf_best_practices` — .proto design guidelines, descriptor management, Spark 4.0.2 checklist, full recap
+
+## [1.1.2] — 2026-04-09
 
 ### Added — Iceberg basics (10 notebooks) + Avro basics (10 notebooks)
 

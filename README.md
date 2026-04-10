@@ -149,11 +149,14 @@ spark-cluster/
 │   │   ├── 07_avro_schema_registry.ipynb
 │   │   └── basics/
 │   │       ├── README.md
-│   │       ├── csv/      (10 notebooks)
-│   │       ├── delta/    (10 notebooks)
-│   │       ├── parquet/  (10 notebooks)
-│   │       ├── iceberg/  (10 notebooks)
-│   │       └── avro/     (10 notebooks)
+│   │       ├── csv/       (10 notebooks)
+│   │       ├── delta/     (10 notebooks)
+│   │       ├── parquet/   (10 notebooks)
+│   │       ├── iceberg/   (10 notebooks)
+│   │       ├── avro/      (10 notebooks)
+│   │       ├── orc/       (10 notebooks)
+│   │       ├── json/      (10 notebooks)
+│   │       └── protobuf/  (10 notebooks)
 │   │
 │   └── streaming/                           ← Structured Streaming
 │       ├── README.md
@@ -208,6 +211,51 @@ spark-cluster/
 | `05_delta_advanced_2` | Liquid Clustering vs ZORDER, Deletion Vectors, low-shuffle MERGE, dynamic partition overwrite, shallow/deep clone |
 | `06_parquet_internals` | Row groups, column chunks, encoding schemes (dict/RLE/delta), column statistics, data skipping, row group size tuning |
 | `07_avro_schema_registry` | Avro format, schema evolution (backward/forward/full compatibility), Schema Registry pattern, Kafka→Avro→Parquet pipeline, Avro vs Parquet benchmark |
+
+### `basics/orc/` — ORC for Hive ecosystem workloads
+
+| Notebook | What you will learn |
+|---|---|
+| `01_reading_orc` | spark.read.orc, column pruning, predicate pushdown, stripe metadata |
+| `02_writing_orc` | Compression (zlib/snappy/lz4/zstd), stripe size, bloom filters, sorted write |
+| `03_orc_internals` | 3-level layout (file/stripe/row-index), encodings, column statistics |
+| `04_predicate_pushdown` | Bloom filter pushdown, min/max statistics, supported predicates |
+| `05_orc_vs_parquet` | Head-to-head benchmark, schema evolution, ecosystem support, decision guide |
+| `06_hive_compatibility` | Hive-style partitioning, ACID ORC, SerDe properties |
+| `07_complex_types` | StructType/ArrayType/MapType in ORC, nested column pruning, explode |
+| `08_stripe_tuning` | Stripe size benchmark, row index stride, production config template |
+| `09_orc_to_parquet` | Migration pipeline, validation, performance comparison after migration |
+| `10_performance_tuning` | Diagnosis, optimization checklist, before/after benchmark |
+
+### `basics/json/` — JSON for APIs and logs
+
+| Notebook | What you will learn |
+|---|---|
+| `01_reading_json` | spark.read.json, multiLine, PERMISSIVE/FAILFAST, corrupt records, options |
+| `02_writing_json` | Compression, date formatting, single file, write modes |
+| `03_schema_inference` | inferSchema cost, samplingRatio risk, primitivesAsString, explicit schema |
+| `04_nested_json` | Struct access, explode/posexplode, from_json/to_json, get_json_object, flatten |
+| `05_json_streaming` | File streaming, Kafka JSON deserialization, from_json in Structured Streaming |
+| `06_json_performance` | JSON vs Parquet vs Avro benchmark, why JSON is slow, convert-first pattern |
+| `07_json_schema_validation` | PERMISSIVE + corrupt capture, business rule validation, quarantine pipeline |
+| `08_json_rest_apis` | Wrapped/paginated API responses, unwrap with explode, normalization |
+| `09_json_to_parquet` | Multi-day landing zone, incremental checkpoint, row count validation |
+| `10_json_best_practices` | Schema management, deduplication, production checklist, pitfalls |
+
+### `basics/protobuf/` — Protobuf for gRPC and Kafka
+
+| Notebook | What you will learn |
+|---|---|
+| `01_what_is_protobuf` | Protobuf vs JSON vs Avro, wire types, gRPC use case, Spark integration |
+| `02_proto_schema` | proto3 syntax, scalar types, nested messages, repeated, oneof, field numbers |
+| `03_serialization` | Wire format internals, Python library, size comparison |
+| `04_spark_protobuf` | from_protobuf/to_protobuf, descriptor files, Spark 4.0.2 API |
+| `05_schema_evolution` | Field number rules, reserved, wire-compatible changes, vs Avro evolution |
+| `06_protobuf_kafka` | Kafka + Protobuf architecture, Confluent SR format, streaming deserialization |
+| `07_protobuf_vs_json_avro` | Size/speed benchmark, ecosystem comparison, decision guide |
+| `08_nested_protobuf` | nested→StructType, repeated→ArrayType, map→MapType, flatten |
+| `09_protobuf_to_parquet` | Binary landing zone, UDF deserializer, Parquet output, validation |
+| `10_protobuf_best_practices` | .proto design, descriptor management, Spark checklist, pipeline recap |
 
 ### `streaming/` — Structured Streaming
 
