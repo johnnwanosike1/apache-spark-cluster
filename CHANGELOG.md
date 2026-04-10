@@ -2,12 +2,63 @@
 
 All notable changes follow [Semantic Versioning](https://semver.org/):
 - **MAJOR** — breaking stack change (Spark version, incompatible config)
-- **MINOR** — new features,  new tools
-- **PATCH** — bug fixes, documentation, CI improvements, new notebooks
+- **MINOR** — new features, new notebooks, new tools
+- **PATCH** — bug fixes, documentation, CI improvements
 
 ---
 
-## [1.1.3] — 2026-04-10
+## [1.1.4] — 2026-04-10
+
+### Added — Configuration notebooks + bug fixes
+
+#### `notebooks/configuration/` (new folder)
+- `01_active_configuration` — 22 explicitne nastavených parametrov z spark-defaults.conf načítaných zo živého SparkSession; tabuľka s hodnotou, kategóriou (Cluster/SQL/AQE/Catalog/Shuffle/JVM) a slovenským vysvetlením; pandas HTML render
+- `02_all_parameters` — Všetky Spark parametre cez getConf().getAll(); filter podľa prefixu; fulltext search; porovnanie nastavené vs default; export do CSV
+
+#### Bug fixes (basics/ notebooks)
+- `avro/01_reading_avro` — pyarrow.dataset Avro not supported → fastavro; .load(*args) → .load(list); glob strings → explicit list; ignoreMissingFiles removed
+- `avro/03_schema_definition` — tuple nested structs → explicit StructType + Row(); print syntax error with quotes; multi-non-null union → informational cell + workaround
+- `avro/04_schema_evolution` — .load(v1, v2) → .load([v1, v2])
+- `avro/05_nullable_unions` — complex union write attempt → informational + JSON string workaround; quote syntax errors fixed
+- `avro/06_nested_records` — tuple nested structs → Row(); array of tuples → array of Row()
+- `avro/09_avro_to_parquet` — .load(*all_dirs) → .load(all_dirs)
+- `csv/01_reading_csv` — glob string [12] → explicit list; missing glob import; \N unicode escape; quote multi-char error
+- `csv/04_dirty_data` — .cache() required before _corrupt_record filter (Spark 4.x)
+- `csv/05_large_csv` — csv_input_dir=DATA_DIR → glob *.csv only (CONFLICTING_DIRECTORY_STRUCTURES)
+- `csv/06_encodings` — UTF-8-BOM not supported → Python BOM strip workaround (×2 cells)
+- `csv/07_csv_vs_tsv` — quote multi-char error
+- `csv/08_csv_transformations` — amount__ → amount (normalize_col_name result)
+- `csv/10_streaming_csv` — _corrupt_record missing from schema
+- `delta/02_reading_writing` — backslash continuation + .option() indentation error
+- `delta/04_updates_deletes` — INSERT * → explicit INSERT; UPDATE subquery not supported → DeltaTable API
+- `delta/06_optimize_zorder` — OPTIMIZE WHERE non-partition column → partitioned table
+- `delta/07_schema_enforcement` — ALTER TABLE CHANGE COLUMN requires enableTypeWidening + correct syntax
+- `delta/08_change_data_feed` — UPDATE LIMIT → collect IDs; backslash in f-string fixed
+- `delta/09_partitioning` — Row.get() → getattr()
+- `delta/10_maintenance` — retentionDurationCheck must be set BEFORE VACUUM
+- `iceberg/02_reading_writing` — CREATE TABLE AS VALUES(1) → writeTo.createOrReplace()
+- `iceberg/04_time_travel` — UPDATE LIMIT + subquery → collect IDs; backslash in f-string
+- `iceberg/05_partitioning` — CREATE TABLE AS VALUES(1) → writeTo.partitionedBy()
+- `iceberg/07_partition_evolution` — same VALUES(1) fix
+- `iceberg/08_merge_upsert` — same VALUES(1) fix; tableProperty API
+- `iceberg/09_maintenance` — UPDATE LIMIT fix
+- `iceberg/10_metadata_tables` — UPDATE LIMIT fix
+- `json/01_reading_json` — .cache() + count() before _corrupt_record filter
+- `json/02_writing_json` — bz2 → bzip2 codec name
+- `json/07_json_schema_validation` — .cache() + materialization before filter
+- `orc/10_performance_tuning` — revenue → price column name
+- `parquet/01_reading_parquet` — parquet(list) → parquet(*list)
+- `parquet/03_partitioning` — missing glob import; os.listdir → .is_dir() filter
+- `parquet/06_schema_evolution` — LONG→INT narrowing → try/except (Spark 4.x rejects)
+- `parquet/09_nested_data` — groupBy("user.country") after select → F.col() directly
+- `protobuf/02_proto_schema` — protoc FileNotFoundError → grpcio-tools + Python protobuf fallback
+- `protobuf/04_spark_protobuf` — indentation error; FileNotFoundError wrap; pip install protobuf before import
+
+#### README
+- Added detailed notebook tables for basics/csv, basics/parquet, basics/delta, basics/iceberg, basics/avro
+- Added configuration/ section to Project Structure and Notebooks
+
+## [1.1.3] — 2026-04-09
 
 ### Added — ORC basics (10), JSON basics (10), Protobuf basics (10)
 

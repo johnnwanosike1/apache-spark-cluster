@@ -158,7 +158,12 @@ spark-cluster/
 │   │       ├── json/      (10 notebooks)
 │   │       └── protobuf/  (10 notebooks)
 │   │
-│   └── streaming/                           ← Structured Streaming
+│   ├── streaming/                           ← Structured Streaming
+│   │
+│   └── configuration/                       ← Spark konfigurácia
+│       ├── README.md
+│       ├── 01_active_configuration.ipynb    ← Nastavené parametre + vysvetlenie
+│       └── 02_all_parameters.ipynb          ← Všetky parametre, filter, export
 │       ├── README.md
 │       ├── 01_structured_streaming_fundamentals.ipynb
 │       ├── 02_streaming_iceberg.ipynb
@@ -212,6 +217,81 @@ spark-cluster/
 | `06_parquet_internals` | Row groups, column chunks, encoding schemes (dict/RLE/delta), column statistics, data skipping, row group size tuning |
 | `07_avro_schema_registry` | Avro format, schema evolution (backward/forward/full compatibility), Schema Registry pattern, Kafka→Avro→Parquet pipeline, Avro vs Parquet benchmark |
 
+### `basics/csv/` — CSV for ETL and data exchange
+
+| Notebook | What you will learn |
+|---|---|
+| `01_reading_csv` | spark.read.csv, schema inference, header, encoding, options reference |
+| `02_writing_csv` | Write modes, compression, date formatting, single file output |
+| `03_schema_inference` | inferSchema cost, samplingRatio, explicit schema, type conflicts |
+| `04_dirty_data` | PERMISSIVE + columnNameOfCorruptRecord, corrupt record quarantine (.cache() required) |
+| `05_large_csv` | Chunked reads, CSV → Parquet pipeline, incremental processing |
+| `06_encodings` | UTF-8, Latin-1, BOM handling, encoding detection, safe ingestion pipeline |
+| `07_csv_vs_tsv` | RFC 4180, TSV, custom delimiters, quote/escape options |
+| `08_csv_transformations` | Column name normalization, trim/case, date parsing, type casting |
+| `09_csv_to_parquet` | Landing zone → Parquet pipeline, partitioning, validation |
+| `10_streaming_csv` | File-based CSV streaming, schema enforcement, corrupt record handling |
+
+### `basics/parquet/` — Parquet for analytics storage
+
+| Notebook | What you will learn |
+|---|---|
+| `01_reading_parquet` | spark.read.parquet, *paths unpacking, column pruning, metadata |
+| `02_writing_parquet` | Compression codecs (snappy/zstd/gzip), write modes, coalesce |
+| `03_partitioning` | Partition directory structure, cardinality impact, partition pruning |
+| `04_predicate_pushdown` | Statistics-based skipping, supported predicates, explain() verification |
+| `05_column_pruning` | Reading only needed columns, nested struct pruning, benchmark |
+| `06_schema_evolution` | Adding/removing columns, mergeSchema, type widening (INT→LONG) |
+| `07_small_files` | Small file problem, compaction with repartition/coalesce, OPTIMIZE patterns |
+| `08_compression_codecs` | snappy vs zstd vs gzip vs lz4 — size/speed tradeoffs |
+| `09_nested_data` | StructType/ArrayType/MapType, explode, groupBy on nested fields |
+| `10_performance_tuning` | Diagnosis checklist, optimization workflow, before/after benchmark |
+
+### `basics/delta/` — Delta Lake for ACID data lakes
+
+| Notebook | What you will learn |
+|---|---|
+| `01_first_table` | Create Delta table, writeTo API, table properties, DeltaTable object |
+| `02_reading_writing` | Write modes, idempotent writes (txnAppId/txnVersion), replaceWhere |
+| `03_acid_transactions` | Concurrent writes, optimistic concurrency, conflict resolution |
+| `04_updates_deletes` | UPDATE/DELETE/MERGE, DeltaTable API, subquery limitations |
+| `05_time_travel` | versionAsOf, timestampAsOf, RESTORE, history, retention |
+| `06_optimize_zorder` | OPTIMIZE compaction, ZORDER multi-column clustering, partition WHERE |
+| `07_schema_enforcement` | Schema enforcement, mergeSchema, enableTypeWidening, ALTER TABLE |
+| `08_change_data_feed` | CDF enable/read, incremental pipeline with checkpoint, UPDATE workarounds |
+| `09_partitioning` | Hive-style partitioning, Liquid Clustering, Row.get() → getattr fix |
+| `10_maintenance` | VACUUM (retention check order), OPTIMIZE schedule, table health |
+
+### `basics/iceberg/` — Apache Iceberg open table format
+
+| Notebook | What you will learn |
+|---|---|
+| `01_first_table` | Iceberg catalog (local/hadoop), writeTo API, namespace/table creation |
+| `02_reading_writing` | Append/overwrite, writeTo.createOrReplace(), read options |
+| `03_snapshots` | Snapshot lifecycle, expire_snapshots, rollback, snapshot isolation |
+| `04_time_travel` | snapshot_id/timestamp travel, UPDATE workarounds (no LIMIT/subquery) |
+| `05_partitioning` | Hidden partitioning transforms (months/bucket/truncate), writeTo.partitionedBy() |
+| `06_schema_evolution` | addColumn/dropColumn/renameColumn, type promotion, Iceberg schema evolution |
+| `07_partition_evolution` | add_partition_field/remove_partition_field without rewrite |
+| `08_merge_upsert` | MERGE INTO, MoR vs CoW, tableProperty API, upsert patterns |
+| `09_maintenance` | rewrite_data_files, expire_snapshots, remove_orphan_files |
+| `10_metadata_tables` | snapshots/files/manifests/history metadata tables, UPDATE workarounds |
+
+### `basics/avro/` — Avro for Kafka streaming pipelines
+
+| Notebook | What you will learn |
+|---|---|
+| `01_reading_avro` | format("avro").load(), directory/list read, recursiveFileLookup, fastavro schema inspect |
+| `02_writing_avro` | avroSchema option, compression, snappy/deflate/bzip2, write modes |
+| `03_schema_definition` | record/array/map/union types, explicit StructType+Row required for nested structs |
+| `04_schema_evolution` | Backward/forward compatibility, REMOVE+default, .load([v1, v2]) |
+| `05_nullable_unions` | ["null","string"] unions, multi-non-null union limitation, JSON string workaround |
+| `06_nested_records` | Deeply nested records, array of structs — Row() objects required (no tuples) |
+| `07_kafka_simulation` | Kafka producer/consumer simulation, from_avro/to_avro, binary column |
+| `08_avro_vs_parquet` | Size/speed benchmark, schema registry pattern, when to use each |
+| `09_avro_to_parquet` | Landing zone pipeline, wide schema merge, validation |
+| `10_avro_compression` | Codec benchmark (null/snappy/deflate/bzip2), size vs speed tradeoffs |
+
 ### `basics/orc/` — ORC for Hive ecosystem workloads
 
 | Notebook | What you will learn |
@@ -264,6 +344,13 @@ spark-cluster/
 | `01_structured_streaming_fundamentals` | Stream-as-table model, file/memory sources, output modes, watermarking, sliding windows, checkpointing, metrics monitoring |
 | `02_streaming_iceberg` | Exactly-once writes to Iceberg, atomic snapshot commits per micro-batch, time travel on streaming data, aggregated streaming sinks, online compaction |
 | `03_stateful_operations` | Session windows, `mapGroupsWithState` for user stats & VIP detection, `flatMapGroupsWithState` for funnel analysis, state timeouts, RocksDB state store |
+
+### `configuration/` — Spark konfigurácia
+
+| Notebook | Obsah |
+|---|---|
+| `01_active_configuration` | Všetky **explicitne nastavené** parametre z `spark-defaults.conf` — skutočná hodnota zo SparkSession, kategória (Cluster/SQL/AQE/Catalog/Shuffle/JVM), slovenské vysvetlenie |
+| `02_all_parameters` | **Všetky** Spark parametre vrátane defaultov — filter podľa prefixu, fulltext search, porovnanie nastavené vs default, export do CSV |
 
 ## Docs & Troubleshooting
 
