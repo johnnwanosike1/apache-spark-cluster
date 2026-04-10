@@ -7,6 +7,80 @@ All notable changes follow [Semantic Versioning](https://semver.org/):
 
 ---
 
+## [1.1.2] — 2026-04-10
+
+### Added — Iceberg basics (10 notebooks) + Avro basics (10 notebooks)
+
+#### `data_formats_storage/basics/iceberg/`
+- `01_first_table` — Iceberg architecture (metadata.json + Avro manifests + Parquet data),
+  CREATE TABLE via SQL and writeTo API, Hadoop catalog, Iceberg vs Delta comparison
+- `02_reading_writing` — writeTo/append/overwritePartitions, fanout-enabled, partition pruning
+- `03_snapshots` — Snapshot per write, .snapshots metadata, rollback_to_snapshot, expire_snapshots
+- `04_time_travel` — VERSION AS OF, TIMESTAMP AS OF, tags as named checkpoints, snapshot diffs
+- `05_partitioning` — Hidden partitioning transforms (years/months/days/hours/bucket/truncate),
+  automatic partition pruning without explicit partition columns in SQL
+- `06_schema_evolution` — ADD/DROP/RENAME columns (metadata-only), type promotion,
+  column IDs vs names (true rename safety without data rewrite)
+- `07_partition_evolution` — REPLACE PARTITION FIELD without data rewrite, mixed-layout
+  reads, partition spec history per file
+- `08_merge_upsert` — MERGE INTO (basic + 3-way + WHEN NOT MATCHED BY SOURCE),
+  CDC upsert pattern, MoR vs CoW write modes
+- `09_maintenance` — expire_snapshots, rewrite_data_files (binpack), rewrite_manifests,
+  remove_orphan_files — maintenance schedule
+- `10_metadata_tables` — All Iceberg metadata tables (.snapshots/.files/.manifests/
+  .history/.partitions/.refs), table health dashboard
+
+#### `data_formats_storage/basics/avro/`
+- `01_reading_avro` — format("avro"), avroSchema reader option, ignoreMissingFiles,
+  recursiveFileLookup, JAR verification
+- `02_writing_avro` — Compression codecs (uncompressed/snappy/deflate/bzip2),
+  explicit avroSchema on write, recordName/namespace
+- `03_schema_definition` — All Avro types (primitive, record, array, map, union, enum),
+  logical types (date/timestamp), Avro JSON to Spark StructType mapping
+- `04_schema_evolution` — Backward/forward/full compatibility rules, add/remove with
+  defaults, aliases for rename, reader vs writer schema pattern
+- `05_nullable_unions` — ["null","T"] pattern, default value ordering, complex unions,
+  null handling in Spark queries
+- `06_nested_records` — Nested records, arrays of records, maps, dot notation access,
+  explode patterns, flatten for analytics/Parquet storage
+- `07_kafka_simulation` — Confluent wire format (magic byte + schema_id + payload),
+  Schema Registry simulation, batch Avro deserialization in Spark
+- `08_avro_vs_parquet` — Detailed benchmark: storage size, write/read speed, column
+  pruning (Avro has none), predicate pushdown, when to use each format
+- `09_avro_to_parquet` — Multi-version Avro landing zone, wide schema normalization,
+  type conversion, partitioned Parquet output, row count validation
+- `10_avro_compression` — Codec benchmark (uncompressed/snappy/deflate/bzip2/xz),
+  compression per data type, Kafka vs storage codec recommendations
+
+## [1.1.1] — 2026-04-09
+
+### Fixed
+- Added `spark-avro_2.13-4.0.2.jar` to Dockerfile — Avro is built-in since Spark 2.4
+  but requires the external JAR to be deployed; without it `format("avro")` throws
+  `AnalysisException: Failed to find data source: avro`
+
+---
+
+## [1.1.0] — 2026-04-09
+
+### Added — Data Formats & Storage expansion
+
+#### `data_formats_storage/`
+- `04_iceberg_advanced_2.ipynb` — Change Data Feed for CDC pipelines, branching
+  workflow (dev/staging/prod with fast-forward), MoR vs CoW compaction strategies,
+  full metadata table observability, row-level delete performance
+- `05_delta_advanced_2.ipynb` — Liquid Clustering (next-gen ZORDER), Deletion Vectors
+  for fast row-level deletes, low-shuffle MERGE, dynamic partition overwrite,
+  shallow/deep table cloning
+- `06_parquet_internals.ipynb` — Parquet physical layout (row groups/column chunks/pages),
+  encoding schemes (PLAIN_DICTIONARY/RLE/DELTA_BINARY_PACKED), column statistics and
+  data skipping, row group size tuning, Parquet vs ORC internal comparison
+- `07_avro_schema_registry.ipynb` — Avro binary format and schema definition, schema
+  evolution (backward/forward/full compatibility), Schema Registry pattern simulation,
+  Kafka→Avro→Parquet pipeline, Avro vs Parquet performance benchmark
+
+---
+
 ## [1.0.1] — 2026-04-08
 
 ### Added — Learning Notebooks

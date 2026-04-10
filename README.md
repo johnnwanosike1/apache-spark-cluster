@@ -1,4 +1,4 @@
-# Apache Spark 4.0.2 — Local Cluster with Gluten/Velox, Iceberg, Delta, JupyterLab
+# Apache Spark 4.0.2 — Local Cluster with Gluten/Velox, Iceberg, Delta, Avro, JupyterLab
 
 A local development environment for testing and benchmarking Spark features and performance.
 
@@ -15,11 +15,40 @@ A local development environment for testing and benchmarking Spark features and 
 | Apache Gluten | **1.6.0** | Velox backend — supports Spark 4.0.x |
 | Apache Iceberg | **1.10.1** | `iceberg-spark-runtime-4.0_2.13` |
 | Delta Lake | **4.0.1** | `delta-spark_2.13` |
+| Apache Avro | **4.0.2** | `spark-avro_2.13` — required for `format("avro")` |
 | JupyterLab | latest | |
 | Base OS | Ubuntu 22.04 | |
 
 > **Note:** Gluten 1.6.0 was tested against Spark 4.0.1. Running on 4.0.2 produces a harmless
 > `version not matched` warning — everything works correctly.
+
+## Deployed JARs
+
+All JARs are downloaded at Docker build time into `${SPARK_HOME}/jars/`.
+
+| JAR | Version | Purpose | Active by default |
+|---|---|---|---|
+| `iceberg-spark-runtime-4.0_2.13` | 1.10.1 | Iceberg catalog + table format | ✅ Yes — configured in `spark-defaults.conf` |
+| `delta-spark_2.13` | 4.0.1 | Delta Lake table format + DML | ✅ Yes — configured in `spark-defaults.conf` |
+| `delta-storage` | 4.0.1 | Delta Lake storage abstraction layer | ✅ Yes — required by delta-spark |
+| `spark-avro_2.13` | 4.0.2 | Avro read/write (`format("avro")`) | ✅ Yes — auto-loaded from jars/ |
+| `gluten-velox-bundle-spark4.0_2.13` | 1.6.0 | Gluten native execution engine | ⚙️ Only in `make up-gluten` mode |
+
+### Spark extensions activated in `spark-defaults.conf`
+
+```
+spark.sql.extensions = org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions,
+                       io.delta.sql.DeltaSparkSessionExtension
+
+spark.sql.catalog.spark_catalog = org.apache.spark.sql.delta.catalog.DeltaCatalog
+spark.sql.catalog.local          = org.apache.iceberg.spark.SparkCatalog
+spark.sql.catalog.local.type     = hadoop
+spark.sql.catalog.local.warehouse = /workspace/data/warehouse/iceberg
+```
+
+Avro and standard Parquet/ORC/JSON/CSV are available without any extra configuration —
+they are part of Spark core or auto-loaded from the jars directory.
+
 
 ## Architecture
 
@@ -113,7 +142,18 @@ spark-cluster/
 │   │   ├── README.md
 │   │   ├── 01_format_benchmark.ipynb
 │   │   ├── 02_iceberg_advanced.ipynb
-│   │   └── 03_delta_advanced.ipynb
+│   │   ├── 03_delta_advanced.ipynb
+│   │   ├── 04_iceberg_advanced_2.ipynb
+│   │   ├── 05_delta_advanced_2.ipynb
+│   │   ├── 06_parquet_internals.ipynb
+│   │   ├── 07_avro_schema_registry.ipynb
+│   │   └── basics/
+│   │       ├── README.md
+│   │       ├── csv/      (10 notebooks)
+│   │       ├── delta/    (10 notebooks)
+│   │       ├── parquet/  (10 notebooks)
+│   │       ├── iceberg/  (10 notebooks)
+│   │       └── avro/     (10 notebooks)
 │   │
 │   └── streaming/                           ← Structured Streaming
 │       ├── README.md
@@ -164,6 +204,10 @@ spark-cluster/
 | `01_format_benchmark` | Row vs columnar formats, Parquet/ORC/Avro/CSV write+read benchmark, column pruning, predicate pushdown, compression codec comparison |
 | `02_iceberg_advanced` | ACID transactions, MERGE INTO, time travel, schema evolution, partition evolution, row-level DELETE/UPDATE, snapshot management, branching & tagging |
 | `03_delta_advanced` | Transaction log internals, OPTIMIZE, ZORDER, VACUUM, Change Data Feed, time travel, RESTORE, schema enforcement/evolution, generated columns, data skipping |
+| `04_iceberg_advanced_2` | CDF for CDC pipelines, branching workflow (dev/staging/prod), MoR vs CoW compaction, metadata tables, row-level delete strategies |
+| `05_delta_advanced_2` | Liquid Clustering vs ZORDER, Deletion Vectors, low-shuffle MERGE, dynamic partition overwrite, shallow/deep clone |
+| `06_parquet_internals` | Row groups, column chunks, encoding schemes (dict/RLE/delta), column statistics, data skipping, row group size tuning |
+| `07_avro_schema_registry` | Avro format, schema evolution (backward/forward/full compatibility), Schema Registry pattern, Kafka→Avro→Parquet pipeline, Avro vs Parquet benchmark |
 
 ### `streaming/` — Structured Streaming
 
