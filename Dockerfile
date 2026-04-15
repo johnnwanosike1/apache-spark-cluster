@@ -85,6 +85,7 @@ RUN mkdir -p /workspace/data /workspace/notebooks "${SPARK_LOG_DIR}"
 # Config + entrypoint
 # ---------------------------------------------------------------------------
 COPY conf/spark-defaults.conf "${SPARK_HOME}/conf/spark-defaults.conf"
+COPY conf/log4j2.properties   "${SPARK_HOME}/conf/log4j2.properties"
 COPY entrypoint.sh /entrypoint.sh
 RUN sed -i 's/\r//' /entrypoint.sh && chmod +x /entrypoint.sh
 
