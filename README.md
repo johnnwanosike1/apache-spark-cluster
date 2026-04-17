@@ -159,17 +159,17 @@ spark-cluster/
 │   │       └── protobuf/  (10 notebooks)
 │   │
 │   ├── streaming/                           ← Structured Streaming
+│   │   ├── README.md
+│   │   ├── 01_structured_streaming_fundamentals.ipynb
+│   │   ├── 02_streaming_iceberg.ipynb
+│   │   └── 03_stateful_operations.ipynb
 │   │
-│   └── configuration/                       ← Spark konfigurácia
+│   └── configuration/                       ← Spark configuration
 │       ├── README.md
-│       ├── 01_active_configuration.ipynb    ← Nastavené parametre + vysvetlenie
-│       └── 02_all_parameters.ipynb          ← Všetky parametre, filter, export
-│       ├── README.md
-│       ├── 01_structured_streaming_fundamentals.ipynb
-│       ├── 02_streaming_iceberg.ipynb
-│       └── 03_stateful_operations.ipynb
+│       ├── 01_active_configuration.ipynb
+│       └── 02_all_parameters.ipynb
 │
-├── docs/                                    ← Troubleshooting guides
+├── docs/
 │   └── windows-tips.md
 ├── data/                                    ← Parquet data (git-ignored)
 └── spark-events/                            ← History Server logs (git-ignored)
@@ -221,75 +221,75 @@ spark-cluster/
 
 | Notebook | What you will learn |
 |---|---|
-| `01_reading_csv` | spark.read.csv, schema inference, header, encoding, options reference |
+| `01_reading_csv` | spark.read.csv, header, encoding, glob patterns (use Python glob — not Spark glob strings on local FS) |
 | `02_writing_csv` | Write modes, compression, date formatting, single file output |
 | `03_schema_inference` | inferSchema cost, samplingRatio, explicit schema, type conflicts |
-| `04_dirty_data` | PERMISSIVE + columnNameOfCorruptRecord, corrupt record quarantine (.cache() required) |
-| `05_large_csv` | Chunked reads, CSV → Parquet pipeline, incremental processing |
-| `06_encodings` | UTF-8, Latin-1, BOM handling, encoding detection, safe ingestion pipeline |
-| `07_csv_vs_tsv` | RFC 4180, TSV, custom delimiters, quote/escape options |
-| `08_csv_transformations` | Column name normalization, trim/case, date parsing, type casting |
+| `04_dirty_data` | PERMISSIVE + columnNameOfCorruptRecord, .cache() required before filtering on _corrupt_record (Spark 4.x) |
+| `05_large_csv` | CSV → Parquet pipeline using glob-resolved file list, incremental processing |
+| `06_encodings` | UTF-8, Latin-1, BOM handling (Python strip — UTF-8-BOM not supported in Spark 4.x), encoding detection |
+| `07_csv_vs_tsv` | RFC 4180, TSV, custom delimiters, quote/escape (single char only) |
+| `08_csv_transformations` | Column name normalization, trim/case, type casting |
 | `09_csv_to_parquet` | Landing zone → Parquet pipeline, partitioning, validation |
-| `10_streaming_csv` | File-based CSV streaming, schema enforcement, corrupt record handling |
+| `10_streaming_csv` | File-based CSV streaming, _corrupt_record in schema required for PERMISSIVE mode |
 
 ### `basics/parquet/` — Parquet for analytics storage
 
 | Notebook | What you will learn |
 |---|---|
-| `01_reading_parquet` | spark.read.parquet, *paths unpacking, column pruning, metadata |
+| `01_reading_parquet` | spark.read.parquet(*paths) — list must be unpacked with *, column pruning, metadata |
 | `02_writing_parquet` | Compression codecs (snappy/zstd/gzip), write modes, coalesce |
-| `03_partitioning` | Partition directory structure, cardinality impact, partition pruning |
+| `03_partitioning` | Partition directory structure, cardinality impact, os.listdir with .is_dir() filter |
 | `04_predicate_pushdown` | Statistics-based skipping, supported predicates, explain() verification |
 | `05_column_pruning` | Reading only needed columns, nested struct pruning, benchmark |
-| `06_schema_evolution` | Adding/removing columns, mergeSchema, type widening (INT→LONG) |
-| `07_small_files` | Small file problem, compaction with repartition/coalesce, OPTIMIZE patterns |
+| `06_schema_evolution` | Adding/removing columns, mergeSchema, type narrowing rejected in Spark 4.x |
+| `07_small_files` | Small file problem, compaction with repartition/coalesce |
 | `08_compression_codecs` | snappy vs zstd vs gzip vs lz4 — size/speed tradeoffs |
-| `09_nested_data` | StructType/ArrayType/MapType, explode, groupBy on nested fields |
-| `10_performance_tuning` | Diagnosis checklist, optimization workflow, before/after benchmark |
+| `09_nested_data` | StructType/ArrayType/MapType, explode, groupBy on nested fields via F.col() |
+| `10_performance_tuning` | Diagnosis checklist, cache before loop pattern, before/after benchmark |
 
 ### `basics/delta/` — Delta Lake for ACID data lakes
 
 | Notebook | What you will learn |
 |---|---|
 | `01_first_table` | Create Delta table, writeTo API, table properties, DeltaTable object |
-| `02_reading_writing` | Write modes, idempotent writes (txnAppId/txnVersion), replaceWhere |
+| `02_reading_writing` | Write modes, idempotent writes (txnAppId/txnVersion), parenthesised method chains |
 | `03_acid_transactions` | Concurrent writes, optimistic concurrency, conflict resolution |
-| `04_updates_deletes` | UPDATE/DELETE/MERGE, DeltaTable API, subquery limitations |
+| `04_updates_deletes` | UPDATE/DELETE/MERGE, explicit INSERT columns (INSERT * requires identical schemas) |
 | `05_time_travel` | versionAsOf, timestampAsOf, RESTORE, history, retention |
-| `06_optimize_zorder` | OPTIMIZE compaction, ZORDER multi-column clustering, partition WHERE |
-| `07_schema_enforcement` | Schema enforcement, mergeSchema, enableTypeWidening, ALTER TABLE |
-| `08_change_data_feed` | CDF enable/read, incremental pipeline with checkpoint, UPDATE workarounds |
-| `09_partitioning` | Hive-style partitioning, Liquid Clustering, Row.get() → getattr fix |
-| `10_maintenance` | VACUUM (retention check order), OPTIMIZE schedule, table health |
+| `06_optimize_zorder` | OPTIMIZE compaction, ZORDER, OPTIMIZE WHERE on partition columns only, cache-before-loop pattern |
+| `07_schema_enforcement` | Schema enforcement, mergeSchema, enableTypeWidening + correct ALTER TABLE syntax |
+| `08_change_data_feed` | CDF enable/read, incremental pipeline, UPDATE with DeltaTable API (no LIMIT/subquery) |
+| `09_partitioning` | Hive-style partitioning, Liquid Clustering, getattr() instead of Row.get() |
+| `10_maintenance` | VACUUM — retentionDurationCheck must be disabled BEFORE VACUUM RETAIN 0 HOURS |
 
 ### `basics/iceberg/` — Apache Iceberg open table format
 
 | Notebook | What you will learn |
 |---|---|
 | `01_first_table` | Iceberg catalog (local/hadoop), writeTo API, namespace/table creation |
-| `02_reading_writing` | Append/overwrite, writeTo.createOrReplace(), read options |
+| `02_reading_writing` | writeTo.createOrReplace() — version-hint.text WARN on first create is expected/harmless |
 | `03_snapshots` | Snapshot lifecycle, expire_snapshots, rollback, snapshot isolation |
-| `04_time_travel` | snapshot_id/timestamp travel, UPDATE workarounds (no LIMIT/subquery) |
-| `05_partitioning` | Hidden partitioning transforms (months/bucket/truncate), writeTo.partitionedBy() |
-| `06_schema_evolution` | addColumn/dropColumn/renameColumn, type promotion, Iceberg schema evolution |
+| `04_time_travel` | snapshot_id/timestamp travel, UPDATE workarounds (no LIMIT, no subquery — collect IDs in Python) |
+| `05_partitioning` | Hidden partitioning via F.partitioning.months/bucket/truncate (F.months deprecated in Spark 4.0) |
+| `06_schema_evolution` | addColumn/dropColumn/renameColumn, type promotion |
 | `07_partition_evolution` | add_partition_field/remove_partition_field without rewrite |
-| `08_merge_upsert` | MERGE INTO, MoR vs CoW, tableProperty API, upsert patterns |
-| `09_maintenance` | rewrite_data_files, expire_snapshots, remove_orphan_files |
+| `08_merge_upsert` | MERGE INTO, MoR vs CoW, tableProperty API, writeTo.createOrReplace() instead of CTAS |
+| `09_maintenance` | rewrite_data_files, expire_snapshots, remove_orphan_files, cache-before-loop pattern |
 | `10_metadata_tables` | snapshots/files/manifests/history metadata tables, UPDATE workarounds |
 
 ### `basics/avro/` — Avro for Kafka streaming pipelines
 
 | Notebook | What you will learn |
 |---|---|
-| `01_reading_avro` | format("avro").load(), directory/list read, recursiveFileLookup, fastavro schema inspect |
+| `01_reading_avro` | format("avro").load(list), fastavro for schema inspection (pyarrow.dataset does not support Avro) |
 | `02_writing_avro` | avroSchema option, compression, snappy/deflate/bzip2, write modes |
-| `03_schema_definition` | record/array/map/union types, explicit StructType+Row required for nested structs |
-| `04_schema_evolution` | Backward/forward compatibility, REMOVE+default, .load([v1, v2]) |
+| `03_schema_definition` | record/array/map/union types, StructType+Row() required for nested structs (no tuples) |
+| `04_schema_evolution` | Backward/forward compatibility, .load([v1, v2]) list syntax |
 | `05_nullable_unions` | ["null","string"] unions, multi-non-null union limitation, JSON string workaround |
-| `06_nested_records` | Deeply nested records, array of structs — Row() objects required (no tuples) |
+| `06_nested_records` | Deeply nested records, array of structs — Row() objects required |
 | `07_kafka_simulation` | Kafka producer/consumer simulation, from_avro/to_avro, binary column |
 | `08_avro_vs_parquet` | Size/speed benchmark, schema registry pattern, when to use each |
-| `09_avro_to_parquet` | Landing zone pipeline, wide schema merge, validation |
+| `09_avro_to_parquet` | Landing zone pipeline, .load(list) syntax, validation |
 | `10_avro_compression` | Codec benchmark (null/snappy/deflate/bzip2), size vs speed tradeoffs |
 
 ### `basics/orc/` — ORC for Hive ecosystem workloads
@@ -305,19 +305,19 @@ spark-cluster/
 | `07_complex_types` | StructType/ArrayType/MapType in ORC, nested column pruning, explode |
 | `08_stripe_tuning` | Stripe size benchmark, row index stride, production config template |
 | `09_orc_to_parquet` | Migration pipeline, validation, performance comparison after migration |
-| `10_performance_tuning` | Diagnosis, optimization checklist, before/after benchmark |
+| `10_performance_tuning` | Diagnosis, optimization checklist, price column (not revenue), before/after benchmark |
 
 ### `basics/json/` — JSON for APIs and logs
 
 | Notebook | What you will learn |
 |---|---|
-| `01_reading_json` | spark.read.json, multiLine, PERMISSIVE/FAILFAST, corrupt records, options |
-| `02_writing_json` | Compression, date formatting, single file, write modes |
+| `01_reading_json` | spark.read.json, multiLine, PERMISSIVE/FAILFAST, .cache() required before _corrupt_record filter |
+| `02_writing_json` | Compression (bzip2 not bz2), date formatting, single file, write modes |
 | `03_schema_inference` | inferSchema cost, samplingRatio risk, primitivesAsString, explicit schema |
 | `04_nested_json` | Struct access, explode/posexplode, from_json/to_json, get_json_object, flatten |
 | `05_json_streaming` | File streaming, Kafka JSON deserialization, from_json in Structured Streaming |
 | `06_json_performance` | JSON vs Parquet vs Avro benchmark, why JSON is slow, convert-first pattern |
-| `07_json_schema_validation` | PERMISSIVE + corrupt capture, business rule validation, quarantine pipeline |
+| `07_json_schema_validation` | PERMISSIVE + corrupt capture, .cache().count() to materialize before filter |
 | `08_json_rest_apis` | Wrapped/paginated API responses, unwrap with explode, normalization |
 | `09_json_to_parquet` | Multi-day landing zone, incremental checkpoint, row count validation |
 | `10_json_best_practices` | Schema management, deduplication, production checklist, pitfalls |
@@ -327,9 +327,9 @@ spark-cluster/
 | Notebook | What you will learn |
 |---|---|
 | `01_what_is_protobuf` | Protobuf vs JSON vs Avro, wire types, gRPC use case, Spark integration |
-| `02_proto_schema` | proto3 syntax, scalar types, nested messages, repeated, oneof, field numbers |
+| `02_proto_schema` | proto3 syntax, scalar types, nested messages — grpcio-tools fallback, Python protobuf API fallback |
 | `03_serialization` | Wire format internals, Python library, size comparison |
-| `04_spark_protobuf` | from_protobuf/to_protobuf, descriptor files, Spark 4.0.2 API |
+| `04_spark_protobuf` | from_protobuf/to_protobuf, descriptor files — protoc fallback chain (grpcio-tools → protobuf API) |
 | `05_schema_evolution` | Field number rules, reserved, wire-compatible changes, vs Avro evolution |
 | `06_protobuf_kafka` | Kafka + Protobuf architecture, Confluent SR format, streaming deserialization |
 | `07_protobuf_vs_json_avro` | Size/speed benchmark, ecosystem comparison, decision guide |
@@ -345,12 +345,12 @@ spark-cluster/
 | `02_streaming_iceberg` | Exactly-once writes to Iceberg, atomic snapshot commits per micro-batch, time travel on streaming data, aggregated streaming sinks, online compaction |
 | `03_stateful_operations` | Session windows, `mapGroupsWithState` for user stats & VIP detection, `flatMapGroupsWithState` for funnel analysis, state timeouts, RocksDB state store |
 
-### `configuration/` — Spark konfigurácia
+### `configuration/` — Spark configuration
 
-| Notebook | Obsah |
+| Notebook | What you will learn |
 |---|---|
-| `01_active_configuration` | Všetky **explicitne nastavené** parametre z `spark-defaults.conf` — skutočná hodnota zo SparkSession, kategória (Cluster/SQL/AQE/Catalog/Shuffle/JVM), slovenské vysvetlenie |
-| `02_all_parameters` | **Všetky** Spark parametre vrátane defaultov — filter podľa prefixu, fulltext search, porovnanie nastavené vs default, export do CSV |
+| `01_active_configuration` | All explicitly configured parameters from `spark-defaults.conf` — live values from SparkSession, category (Cluster/SQL/AQE/Catalog/Shuffle/JVM), explanation |
+| `02_all_parameters` | All Spark parameters including defaults — filter by prefix, keyword search, explicitly set vs default comparison, CSV export |
 
 ## Docs & Troubleshooting
 
