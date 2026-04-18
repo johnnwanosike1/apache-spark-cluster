@@ -165,11 +165,19 @@ spark-cluster/
 │   │   └── 03_stateful_operations.ipynb
 │   │
 │   ├── configuration/                       ← Spark configuration
+│   │   ├── README.md
+│   │   ├── 01_active_configuration.ipynb
+│   │   └── 02_all_parameters.ipynb
 │   │
-│   └── training/                            ← Databricks cert prep (8 notebooks)
+│   └── training/                            ← Spark Developer cert prep (7 notebooks)
 │       ├── README.md
-│       ├── 01_active_configuration.ipynb
-│       └── 02_all_parameters.ipynb
+│       ├── 01_spark_architecture.ipynb
+│       ├── 02_dataframe_api.ipynb
+│       ├── 03_spark_sql.ipynb
+│       ├── 04_udfs.ipynb
+│       ├── 05_structured_streaming.ipynb
+│       ├── 06_performance_optimization.ipynb
+│       └── 07_pandas_api_on_spark.ipynb
 │
 ├── docs/
 │   └── windows-tips.md
@@ -357,7 +365,7 @@ spark-cluster/
 
 ### `training/` — Databricks Spark Developer Certification Prep
 
-**Target:** Databricks Certified Associate Developer for Apache Spark (v3.5)
+**Target:** Databricks Certified Associate Developer for Apache Spark
 
 | Notebook | Exam Topic | Weight |
 |---|---|---|
@@ -367,7 +375,7 @@ spark-cluster/
 | `04_udfs` | Python UDF, Pandas UDF (vectorized), built-in functions vs UDF performance | ~10% |
 | `05_structured_streaming` | Output modes (append/complete/update), triggers, checkpointLocation, watermarking | ~13% |
 | `06_performance_optimization` | Caching/persist, broadcast joins, AQE, data skew, explain() | ~15% |
-| `07_pandas_api_on_spark` | pyspark.pandas API, to_spark(), toPandas() driver memory warning | ~5% |
+| `07_pandas_api_on_spark` | pyspark.pandas API, df.pandas_api(), to_spark(index_col=...), toPandas() driver memory warning | ~5% |
 
 
 ## Docs & Troubleshooting
