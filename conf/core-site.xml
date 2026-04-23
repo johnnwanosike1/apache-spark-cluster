@@ -1,0 +1,21 @@
+<configuration>
+
+    <property>
+        <name>fs.abfs.impl</name>
+        <value>org.apache.hadoop.fs.azurebfs.AzureBlobFileSystem</value>
+    </property>
+    <property>
+        <name>fs.abfs.impl</name>
+        <value>org.apache.hadoop.fs.azurebfs.AzureBlobFileSystem</value>
+    </property>
+
+     <property>
+        <name>fs.azure.account.auth.type.newstoragedatabricks.dfs.core.windows.net</name>
+        <value>SAS</value>
+    </property>
+    <property>
+        <name>fs.azure.sas.fixed.token.newstoragedatabricks.dfs.core.windows.net</name>
+        <value>c3A9cmFjd2RsbWVvcCZzdD0yMDI1LTA5LTA1VDE1OjA0OjIzWiZzZT0yMDI1LTEwLTA5VDIzOjE5OjIzWiZzdj0yMDI0LTExLTA0JnNyPWMmc2lnPXZNa3FCM0tpbk9PdTBVQ3Bjd2tsJTJCMlN1bE9IUzMlMkZHY1VvZGJzdG12RGcwJTNE</value>
+    </property>
+
+</configuration>

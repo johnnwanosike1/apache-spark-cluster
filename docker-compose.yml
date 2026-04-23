@@ -1,130 +1,77 @@
-
-# =============================================================================
-# Apache Spark 4.1.1 — local cluster
-#
-# Vanilla mode (default):  docker compose up
-# Gluten/Velox mode:       GLUTEN_ENABLED=true docker compose up
-#                      or: edit .env → GLUTEN_ENABLED=true
-#
-# Services:
-#   spark-master    — Spark master               :8080 (UI)  :7077 (cluster)
-#   spark-worker-1  — Worker 1                   :8081 (UI)
-#   spark-worker-2  — Worker 2                   :8083 (UI)
-#   spark-history   — History Server             :18080
-#   notebook        — JupyterLab                 :8888
-# =============================================================================
-
-# ---------------------------------------------------------------------------
-# Shared fragment — applied to every Spark node
-# ---------------------------------------------------------------------------
-x-spark-common: &spark-common
-  build:
-    context: .
-    dockerfile: Dockerfile
-  env_file:
-    - path: .env
-      required: false          # .env is optional; falls back to defaults
-  volumes:
-    - ./data:/workspace/data
-    - ./notebooks:/workspace/notebooks
-    - ./scripts:/workspace/scripts
-    - spark-logs:/opt/spark/logs
-  networks:
-    - spark-net
-  restart: unless-stopped
-
-# ---------------------------------------------------------------------------
-# Environment presets — switch by changing <<: *vanilla-env → *gluten-env
-# or by passing GLUTEN_ENABLED=true on the CLI / in .env
-# ---------------------------------------------------------------------------
-x-vanilla-env: &vanilla-env
-  GLUTEN_ENABLED: "${GLUTEN_ENABLED:-false}"
-
-x-gluten-env: &gluten-env
-  GLUTEN_ENABLED: "true"
-
+version: '3.7'
 services:
-
-  # ── Master ─────────────────────────────────────────────────────────────────
-  spark-master:
-    <<: *spark-common
-    container_name: spark-master
-    hostname: spark-master
+  spark:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    logging:
+      options:
+        max-size: 8g
+    volumes:
+      - ./data:/workspace/data
+      - ./notebooks:/workspace/notebooks
+      - ./scripts:/workspace/scripts
+      - ./data:/opt/spark/work-dir/data
+      - ./scripts:/opt/spark/work-dir/scripts
+      - ./source_files:/opt/spark/work-dir/source_files
+      - ./conf/log4j.properties:/opt/spark/conf/log4j.properties:ro
+      - ./conf/core-site.xml:/opt/spark/conf/core-site.xml
+      - ./conf/metastore-site.xml:/opt/spark/conf/hive-site.xml
+      - ./conf/hadoop-metrics2-hbase.properties:/opt/spark/conf/hadoop-metrics2-hbase.properties:ro
+    env_file:
+      - .env.spark
     environment:
-      <<: *vanilla-env        # change to *gluten-env to hard-code Gluten on master
-      SPARK_ROLE: master
+      - NOTEBOOK_TOKEN=0b1a81c536fc5df4b9eceec215b312bea0e62eb47a38bdd6
+      - NOTEBOOK_PASSWORD=0b1a81c536fc5df4b9eceec215b312bea0e62eb47a38bdd6
+      - SPARK_EXTRA_CONF_DIR=/opt/spark/conf
     ports:
-      - "8080:8080"           # Master Web UI
-      - "7077:7077"           # Cluster port
-    healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:8080"]
-      interval: 15s
-      timeout: 5s
-      retries: 10
-
-  # ── Worker 1 ───────────────────────────────────────────────────────────────
-  spark-worker-1:
-    <<: *spark-common
-    container_name: spark-worker-1
-    hostname: spark-worker-1
+      - "4040:4040"  # Spark UI
+      - "7077:7077"  # Spark Master
+      - "8080:8080"  # Spark UI
+      - "4041:4041"
+      - "4042:4042"
+      - "4043:4043"
+      - "8888:8888"
+    command: bash -c "/opt/spark/sbin/start-master.sh && tail -f /dev/null && jupyter-lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root"
     depends_on:
-      spark-master:
-        condition: service_healthy
-    environment:
-      <<: *vanilla-env
-      SPARK_ROLE: worker
-      SPARK_WORKER_CORES: "2"
-      SPARK_WORKER_MEMORY: "2g"
-      SPARK_WORKER_WEBUI_PORT: "8081"
-    ports:
-      - "8081:8081"
+      - hive-metastore
+      - postgres
+  
 
-  # ── Worker 2 ───────────────────────────────────────────────────────────────
-  spark-worker-2:
-    <<: *spark-common
-    container_name: spark-worker-2
-    hostname: spark-worker-2
+  postgres:
+    image: postgres:11
+    hostname: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: metastore_db
+    expose:
+      - '5432'
+
+  hive-metastore:
+    image: 'akashxrepo/akashx-hive-azure-metastore-deltalate:latest'
+    hostname: hive-metastore
+    ports:
+      - '9083:9083' # Metastore Thrift
+    volumes:
+      # - ./conf/metastore-log4j2.properties:/opt/apache-hive-metastore-3.0.0-bin/conf/metastore-log4j2.properties:ro
+      # - ./conf/log4j.properties:/opt/spark/conf/log4j.properties:ro
+      - ./conf/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+      - ./conf/metastore-site.xml:/opt/hive/conf/hive-site.xml
+      # - ./conf/metastore-log4j2.properties:/opt/hive/conf/metastore-log4j2.properties:ro
+      # - ./conf/log4j.properties:/opt/spark/conf/log4j.properties:ro
+    environment:
+      METASTORE_DB_HOSTNAME: postgres
+      METASTORE_TYPE: postgres
     depends_on:
-      spark-master:
-        condition: service_healthy
-    environment:
-      <<: *vanilla-env
-      SPARK_ROLE: worker
-      SPARK_WORKER_CORES: "2"
-      SPARK_WORKER_MEMORY: "2g"
-      SPARK_WORKER_WEBUI_PORT: "8082"
-    ports:
-      - "8083:8082"
+      - postgres
 
-  # ── History Server ─────────────────────────────────────────────────────────
-  spark-history:
-    <<: *spark-common
-    container_name: spark-history
-    hostname: spark-history
-    environment:
-      SPARK_ROLE: history
-    ports:
-      - "18080:18080"
-
-  # ── JupyterLab Notebook ────────────────────────────────────────────────────
-  notebook:
-    <<: *spark-common
-    container_name: spark-notebook
-    hostname: spark-notebook
-    depends_on:
-      spark-master:
-        condition: service_healthy
-    environment:
-      <<: *vanilla-env
-      SPARK_ROLE: notebook
-      JUPYTER_TOKEN: spark
-    ports:
-      - "8888:8888"           # JupyterLab
-      - "4040:4040"           # Spark App UI (active job)
 
 volumes:
-  spark-logs:
+  postgres_data:
 
 networks:
-  spark-net:
+  akashx-network:
     driver: bridge

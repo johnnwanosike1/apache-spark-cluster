@@ -24,10 +24,10 @@ init:
 	@echo "Directories created."
 
 build:
-	docker compose build
+	docker compose -f docker-compose-cluster.yml build --no-cache
 
 up: init
-	docker compose up -d
+	docker compose -f docker-compose-cluster.yml up -d
 	@echo ""
 	@echo "  Spark Master UI  →  http://localhost:8080"
 	@echo "  History Server   →  http://localhost:18080"
@@ -36,7 +36,7 @@ up: init
 	@echo "Run 'make logs' to watch startup."
 
 up-gluten: init
-	GLUTEN_ENABLED=true docker compose up -d
+	GLUTEN_ENABLED=true docker compose -f docker-compose-cluster.yml up -d
 	@echo ""
 	@echo "  Gluten/Velox mode ENABLED"
 	@echo "  Spark Master UI  →  http://localhost:8080"
@@ -44,13 +44,13 @@ up-gluten: init
 	@echo ""
 
 down:
-	docker compose down
+	docker compose -f docker-compose-cluster.yml down
 
 logs:
-	docker compose logs -f spark-master
+	docker compose -f docker-compose-cluster.yml logs -f spark-master
 
 status:
-	docker compose ps
+	docker compose -f docker-compose-cluster.yml ps
 
 data:
 	@echo "Generating benchmark data (SCALE=$(SCALE)) inside notebook container..."
@@ -61,7 +61,7 @@ data:
 	@echo "Done — data ready in ./data/"
 
 clean:
-	docker compose down
+	docker compose -f docker-compose-cluster.yml down
 	rm -rf data/*.parquet data/parquet data/delta data/iceberg
 	rm -rf spark-events/*
 	@echo "Data cleared. JAR cache (ivy2/) and notebook results kept."
@@ -72,6 +72,6 @@ notebook:
 	 echo "Open $(JUPYTER_URL) in your browser  (token: spark)"
 
 nuke:
-	docker compose down --rmi all --volumes --remove-orphans 2>/dev/null || true
+	docker compose -f docker-compose-cluster.yml down --rmi all --volumes --remove-orphans 2>/dev/null || true
 	docker builder prune -f
 	@echo "All images and cache removed. Run 'make build' to rebuild from scratch."

@@ -21,6 +21,12 @@ ENV PYTHONUNBUFFERED=1
 # when the pip JARs conflict with /opt/spark/jars/ (e.g. Gluten).
 ENV PYTHONPATH=/opt/spark/python:/opt/spark/python/lib/py4j-src.zip:${PYTHONPATH}
 
+
+# hadoop-azure JAR version to add (matches the Hadoop version shipped with Spark)
+ARG HADOOP_AZURE_VERSION=3.4.1
+ARG AZURE_STORAGE_SDK_VERSION=8.6.6
+ARG WILDFLY_OPENSSL_VERSION=1.1.3.Final
+
 USER root
 
 # Set pipefail so pipes fail fast (hadolint DL4006)
@@ -33,7 +39,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
 
 # ---------------------------------------------------------------------------
-# Python packages
+# Python packages for notebook
 # ---------------------------------------------------------------------------
 RUN pip3 install --no-cache-dir \
     py4j \
@@ -60,6 +66,25 @@ RUN curl -fsSL \
  && curl -fsSL \
     "https://repo1.maven.org/maven2/org/apache/spark/spark-avro_2.13/4.0.2/spark-avro_2.13-4.0.2.jar" \
     -o "${SPARK_HOME}/jars/spark-avro_2.13-4.0.2.jar"
+
+# ---------------------------------------------------------------------------
+# Azure connector JARs (Hadoop Azure + dependencies)
+# ---------------------------------------------------------------------------
+RUN JARS_DIR="${SPARK_HOME}/jars" \
+    && MVN_BASE="https://repo1.maven.org/maven2" \
+    \
+    && curl -fsSL "${MVN_BASE}/org/apache/hadoop/hadoop-azure/${HADOOP_AZURE_VERSION}/hadoop-azure-${HADOOP_AZURE_VERSION}.jar" \
+         -o "${JARS_DIR}/hadoop-azure-${HADOOP_AZURE_VERSION}.jar" \
+    
+    && curl -fsSL "https://aws-blogs-artifacts-public.s3.amazonaws.com/artifacts/BDB-2904/azsastknprovider-1.0-SNAPSHOT.jar" \
+         -o "${JARS_DIR}/azsastknprovider-1.0-SNAPSHOT.jar" \
+
+    \
+    && curl -fsSL "${MVN_BASE}/com/microsoft/azure/azure-storage/${AZURE_STORAGE_SDK_VERSION}/azure-storage-${AZURE_STORAGE_SDK_VERSION}.jar" \
+         -o "${JARS_DIR}/azure-storage-${AZURE_STORAGE_SDK_VERSION}.jar" \
+    \
+    && curl -fsSL "${MVN_BASE}/org/wildfly/openssl/wildfly-openssl/${WILDFLY_OPENSSL_VERSION}/wildfly-openssl-${WILDFLY_OPENSSL_VERSION}.jar" \
+         -o "${JARS_DIR}/wildfly-openssl-${WILDFLY_OPENSSL_VERSION}.jar"
 
 # ---------------------------------------------------------------------------
 # Gluten/Velox JAR — extracted from official Apache binary tarball

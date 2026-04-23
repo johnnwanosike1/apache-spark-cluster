@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+
+<configuration>
+
+    <!-- === Metastore Settings === -->
+    <property>
+        <name>metastore.thrift.uris</name>
+        <value>thrift://0.0.0.0:9083</value>
+    </property>
+
+    <property>
+        <name>javax.jdo.option.ConnectionDriverName</name>
+        <value>org.postgresql.Driver</value>
+    </property>
+
+    <property>
+        <name>javax.jdo.option.ConnectionURL</name>
+        <value>jdbc:postgresql://postgres:5432/metastore_db?createDatabaseIfNotExist=true</value>
+    </property>
+
+    <property>
+        <name>javax.jdo.option.ConnectionUserName</name>
+        <value>admin</value>
+    </property>
+
+    <property>
+        <name>javax.jdo.option.ConnectionPassword</name>
+        <value>admin</value>
+    </property>
+
+    <!-- === Azure ADLS Gen2 Settings Using Managed Identity === -->
+
+    <property>
+        <name>fs.abfs.impl</name>
+        <value>org.apache.hadoop.fs.azurebfs.AzureBlobFileSystem</value>
+    </property>
+
+    <property>
+        <name>fs.azure.account.auth.type.newstoragedatabricks.dfs.core.windows.net</name>  <!--(2)-->
+        <value>SAS</value>
+    </property>
+    <property>
+        <name>fs.azure.sas.fixed.token.newstoragedatabricks.dfs.core.windows.net</name>  <!--(3)-->
+        <value>c3A9cmFjd2RsbWVvcCZzdD0yMDI1LTA5LTA1VDE1OjA0OjIzWiZzZT0yMDI1LTEwLTA5VDIzOjE5OjIzWiZzdj0yMDI0LTExLTA0JnNyPWMmc2lnPXZNa3FCM0tpbk9PdTBVQ3Bjd2tsJTJCMlN1bE9IUzMlMkZHY1VvZGJzdG12RGcwJTNE</value>
+    </property>
+    <property>
+        <name>fs.azure.sas.token.provider.type.newstoragedatabricks.dfs.core.windows.net</name>  <!--(2)-->
+        <value>org.apache.hadoop.fs.azurebfs.sas.FixedSASTokenProvider</value>
+    </property>
+
+    <!-- === Hive Unity assembly -->
+
+    <property>
+        <name>hive.input.format</name>
+        <value>io.delta.hive.HiveInputFormat</value>
+    </property>
+    <property>
+        <name>hive.tez.input.format</name>
+        <value>io.delta.hive.HiveInputFormat</value>
+    </property>
+
+
+    <property>
+        <name>fs.azure.read.request.size</name>
+        <value>4194304</value>
+    </property>
+
+    <!-- === Hive Warehouse Settings === -->
+    <property>
+        <name>hive.metastore.warehouse.dir</name>
+        <value>/tmp/table/</value>
+    </property>
+
+    <!-- === ACID Settings === -->
+    <property>
+        <name>hive.support.concurrency</name>
+        <value>false</value>
+    </property>
+
+    <property>
+        <name>hive.enforce.bucketing</name>
+        <value>false</value>
+    </property>
+
+    <property>
+        <name>hive.exec.dynamic.partition.mode</name>
+        <value>nostrict</value>
+    </property>
+
+    <property>
+        <name>hive.txn.manager</name>
+        <value>org.apache.hadoop.hive.ql.lockmgr.DbTxnManager</value>
+    </property>
+
+    <property>
+        <name>hive.security.authorization.manager</name>
+        <value>org.apache.ranger.authorization.hive.authorizer.RangerHiveAuthorizer</value>
+    </property>
+
+    <!-- === Optional Settings === -->
+    <property>
+        <name>hive.metastore.warehouse.external.table.purge</name>
+        <value>false</value>
+    </property>
+
+    <property>
+        <name>hive.compactor.initiator.on</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>hive.compactor.worker.threads</name>
+        <value>1</value>
+    </property>
+
+</configuration>
